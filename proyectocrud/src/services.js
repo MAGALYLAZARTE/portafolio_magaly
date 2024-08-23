@@ -20,6 +20,7 @@ async function printZoo () {
         <p>${zoo.nomnbre}</p>
         <p>${zoo.especie}</p>
         <p>${zoo.años}</p>
+        <button onclick= "deletecharacter(${chatacter.id})">delete</button>
         </li>`
 
     }
@@ -41,7 +42,6 @@ async function deleteZoo() {
     return deleteZoo 
 
 }
-  deleteZoo("1")
 //create method : (post)
 
 async function createZoo() {
