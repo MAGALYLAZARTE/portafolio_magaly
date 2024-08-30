@@ -1,100 +1,87 @@
-const URL_API = "http://localhost:3000/character"
-console.log("hola")
-// son peticiones al servidor 
-//read method : (get)
+const URL_API = "http://localhost:3000/character";
+
+// Obtener todos los personajes (GET)
 async function getAllCharacters() {
- const response = await fetch(URL_API,{
-    method: "GET",
-    headers: {
-        "Content-Type": "application/json",
-    },
-})
-const data = await response.json()  //pasar datos al formato
-return data
-
+    const response = await fetch(URL_API, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    const data = await response.json();
+    return data;
 }
 
-const listTag = document.getElementById("charactersList")  
-
-async function printCharacter () {
+// Mostrar todos los personajes en la lista
+async function printCharacter() {
+    const charactersList = await getAllCharacters();
+    const listTag = document.getElementById("charactersList");
     
-    const zoo = await getAllCharacters()
-   
-    //variable.innerHTML= "" 
+    listTag.innerHTML = ""; // Limpiar la lista
     
-    zoo.map ((animal) => {
-        listTag.innerHTML +=
-        `<li>
-        <p>${animal.nombre}</p>
-        <p>${animal.especie}</p>
-        <p>${animal.años}</p>
-    <button onclick= "deleteCharacter(${animal.id})">delete</button>
-        </li>`
-
-    })
-
+    charactersList.forEach(character => {
+        listTag.innerHTML += `
+            <li>
+                <p>${character.nombre}</p>
+                <p>${character.especie}</p>
+                <p>${character.años}</p>
+                <button onclick="deleteCharacter(${character.id})">Eliminar</button>
+                <button onclick="loadCharacterForUpdate(${character.id})">Actualizar</button>
+            </li>
+        `;
+    });
 }
-printCharacter ()
 
-//delete method : (delete)
+printCharacter();
+
+// Eliminar personaje (DELETE)
 async function deleteCharacter(id) {
-    const response = await fetch(URL_API + `/${id}` , { 
+    await fetch(`${URL_API}/${id}`, { 
         method: 'DELETE',
         headers: {
             "Content-Type": "application/json",
         },
-    })
-    const deletedCharacter = await response.json()
-    return deletedCharacter
+    });
+    printCharacter(); // Recargar la lista después de eliminar
 }
-//create method : (post)
 
-async function createCharacter() {
-    const nombre = document.getElementById("nombre").value;
-    const especie = document.getElementById("especie").value;
-    const años = document.getElementById("años").value;
+// Cargar personaje en el formulario de actualización
+async function loadCharacterForUpdate(id) {
+    const response = await fetch(`${URL_API}/${id}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    const character = await response.json();
 
-    const newAnimal = {
-        nombre: nombre,
-        especie: especie,
-        años: años
+    document.getElementById("updateId").value = character.id;
+    document.getElementById("updateNombre").value = character.nombre;
+    document.getElementById("updateEspecie").value = character.especie;
+    document.getElementById("updateAños").value = character.años;
+}
+
+// Actualizar personaje (PUT)
+async function submitUpdate() {
+    const id = document.getElementById("updateId").value;
+    const updatedData = {
+        nombre: document.getElementById("updateNombre").value,
+        especie: document.getElementById("updateEspecie").value,
+        años: document.getElementById("updateAños").value,
     };
 
-    try {
-        const response = await fetch(URL_API, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(newAnimal)
-        });
+    const response = await fetch(`${URL_API}/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+    });
 
-        if (response.ok) {
-            const data = await response.json(); 
-            addAnimal(data);
-        } else {
-            console.error('Error en la respuesta:', response.statusText);
-        }
-    } catch (error) {
-        console.error('Error en la solicitud:', error);
+    if (response.ok) {
+        console.log("Personaje actualizado");
+        printCharacter();
+    } else {
+        console.error("Error al actualizar el personaje");
     }
 }
-
-async function addAnimal(animal) {
-    const characterAnimal = document.getElementById('charactersList');
-    const listAnimal = document.createElement('li');
-    listAnimal.textContent = `${animal.nombre}, ${animal.especie}, ${animal.años}`;
-
-    characterAnimal.appendChild(listAnimal);
-}
-
-
-//update method : (put)
-async function updateCharacter() {
-
-    
-}
-const addAnimalForm= document.getElementById('createCharacterForm')
-
-  
-
